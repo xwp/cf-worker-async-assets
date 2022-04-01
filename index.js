@@ -42,8 +42,6 @@ async function handleRequest(request) {
 
 	const bypassTransform = Boolean( request.headers.get('x-bypass-transform') );
 
-	console.log( bypassTransform );
-
 	if ( ! bypassTransform  ) {
 		const response = await fetch( url.toString(), request );
 
