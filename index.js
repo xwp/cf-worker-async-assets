@@ -48,15 +48,15 @@ async function handleRequest(request) {
 		const response = await fetch( url.toString(), request );
 
 		return new HTMLRewriter()
-			.on( 'link[rel=stylesheet]', new ExternalStylesheetTransformer() )
-			.on( 'script[src]', new ExternalScriptTransformer() )
+			.on( 'link[rel=stylesheet]', new StylesheetElementHandler() )
+			.on( 'script[src]', new ScriptElementHandler() )
 			.transform( response );
 	}
 
 	return fetch( url.toString(), request );
 }
 
-class ExternalStylesheetTransformer {
+class StylesheetElementHandler {
 	element( linkElement ) {
 		const href = linkElement.getAttribute('href');
 		const bypass = allowList.styles.some( pattern => pattern.test( href ) );
@@ -68,7 +68,7 @@ class ExternalStylesheetTransformer {
 	}
 }
 
-class ExternalScriptTransformer {
+class ScriptElementHandler {
 	element( scriptElement ) {
 		const src = scriptElement.getAttribute('src');
 		const bypass = allowList.scripts.some( pattern => pattern.test( src ) );
