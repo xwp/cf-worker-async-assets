@@ -14,42 +14,10 @@ addEventListener('fetch', event => {
 });
 
 async function handleRequest(request) {
-    const url = new URL(request.url);
-
-    if (url.pathname === '/robots.txt') {
-        return new Response(
-            'User-agent: *\nDisallow: /',
-            {
-                status: 200,
-                headers: {
-                    'Content-Type': 'text/plain'
-                }
-            }
-        );
-    }
-
-    const originalHost = request.headers.get('x-host');
-
-    if (!originalHost) {
-        return new Response(
-            JSON.stringify({
-                error: 'No host provided'
-            }),
-            {
-                status: 403,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-    }
-
-    url.hostname = originalHost;
-
     const bypassTransform = Boolean(request.headers.get('x-bypass-transform'));
 
     if (!bypassTransform) {
-        const response = await fetch(url.toString(), request);
+        const response = await fetch(request);
 
         return new HTMLRewriter()
             .on('link[rel=stylesheet]', new StylesheetElementHandler())
@@ -60,7 +28,7 @@ async function handleRequest(request) {
             .transform(response);
     }
 
-    return fetch(url.toString(), request);
+    return fetch(request);
 }
 
 class StylesheetElementHandler {
