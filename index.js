@@ -1,3 +1,9 @@
+const excludeRoutePatterns = [
+    /wp-content\//,
+    /wp-includes\//,
+    /wp-content\//,
+];
+
 const allowList = {
     styles: [/block-library\/style\.css/],
     scripts: [],
@@ -15,8 +21,9 @@ addEventListener('fetch', event => {
 
 async function handleRequest(request) {
     const bypassTransform = Boolean(request.headers.get('x-bypass-transform'));
+    const byPassRoute = Boolean(request.headers.get('x-bypass-routes')) ? excludeRoutePatterns.some(pattern => pattern.test(request.url)) : false;
 
-    if (!bypassTransform) {
+    if (!bypassTransform && !byPassRoute) {
         const response = await fetch(request);
 
         return new HTMLRewriter()
@@ -96,6 +103,8 @@ class HeadElementHandler {
         preloadList.scripts.map((href) => {
             headElement.prepend(`<link rel="preload" href="${href}" as="script">`, {html: true});
         });
+
+        // Issue: on testing, the LCP image was preloaded on other pages even when its no longer available.
         preloadList.images.map((e) => {
             const attr = [
                 e.href ? `href="${e.href}"` : '',
